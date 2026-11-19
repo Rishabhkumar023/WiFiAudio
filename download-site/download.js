@@ -45,7 +45,7 @@ button.onclick = async () => {
     link.download = manifest.filename;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    status.textContent = "Download ready. Open WiFiAudio, choose a mode and scan its QR with your phone.";
+    status.textContent = "Download ready. Extract All, open WiFiAudio.exe inside the folder and scan the browser QR with your phone. Keep _internal beside the EXE.";
   } catch (error) {
     status.textContent = error.message;
   } finally {

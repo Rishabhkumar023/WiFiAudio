@@ -3,7 +3,7 @@
 The [WiFiAudio license](LICENSE) covers only the original WiFiAudio materials.
 It does not claim ownership of dependencies or replace their licenses. Third-party
 license texts and package versions are collected by `build_download.py` and
-included in built apps under `THIRD_PARTY_LICENSES`.
+included in download ZIPs under `THIRD_PARTY_LICENSES`.
 
 The original WiFiAudio materials are maintained by Rishabh Kumar
 (@Rishabhkumar023). This notice does not claim exclusive ownership of software
@@ -21,7 +21,7 @@ not a complete license inventory of its native binary dependencies.
 The repository's existing notice collector copies available license files; that
 does **not** establish satisfaction of every native-library requirement. Matching
 source availability, the actual codec-library licensing, and replacement/relinking
-requirements for the single-EXE packaging have not been fully verified. A complete
+requirements for binary packaging (including the previous single-EXE release) have not been fully verified. A complete
 binary-distribution review remains necessary before describing this bundle as
 legally cleared for proprietary distribution. The original-materials license must
 not be presented as prohibiting rights granted by the bundled libraries.
@@ -33,5 +33,5 @@ Relevant primary references:
 - [PyAV](https://github.com/PyAV-Org/PyAV)
 - [VB-CABLE publisher and licensing](https://vb-audio.com/Cable/)
 
-VB-CABLE is downloaded separately only after a user chooses setup. Its publisher
+The restored listening release does not install or download VB-CABLE. Earlier meeting releases offered its separate setup. Its publisher
 owns it and supplies the governing terms. WiFiAudio's license does not license it.

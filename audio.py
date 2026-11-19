@@ -8,7 +8,7 @@ from fractions import Fraction
 
 from aiortc import AudioStreamTrack
 from aiortc.mediastreams import MediaStreamError
-from av import AudioFrame, AudioResampler
+from av import AudioFrame
 
 
 class ToneTrack(AudioStreamTrack):
@@ -56,7 +56,6 @@ class LoopbackTrack(AudioStreamTrack):
                 raise ValueError("Set this Windows output to mono/stereo first (surround is unsupported).")
             self.rate = int(device["defaultSampleRate"])
             self.device_name = device["name"]
-            self.device_index = int(device["index"])
 
             def callback(data, count, timing, status):
                 if self.readyState != "live":
@@ -119,94 +118,3 @@ def list_outputs():
         return [{"index": int(d["index"]), "name": d["name"],
                  "channels": int(d["maxInputChannels"]), "rate": int(d["defaultSampleRate"])}
                 for d in devices.get_loopback_device_info_generator()]
-
-
-def list_playback_outputs():
-    """Physical and virtual Windows render endpoints, using WASAPI only."""
-    import pyaudiowpatch as pa
-    with pa.PyAudio() as devices:
-        host = devices.get_host_api_info_by_type(pa.paWASAPI)["index"]
-        return [{"index": i, "name": d["name"], "channels": int(d["maxOutputChannels"]),
-                 "rate": int(d["defaultSampleRate"])}
-                for i in range(devices.get_device_count())
-                if (d := devices.get_device_info_by_index(i))["hostApi"] == host
-                and d["maxOutputChannels"] > 0 and not d.get("isLoopbackDevice")]
-
-
-def select_mic_output(index=None):
-    outputs = list_playback_outputs()
-    if index is not None:
-        matches = [d for d in outputs if d["index"] == index]
-    else:
-        matches = [d for d in outputs if d["name"] == "CABLE Input (VB-Audio Virtual Cable)"]
-    if len(matches) != 1:
-        raise ValueError("Install VB-CABLE and restart Windows, or use --list-playback-devices "
-                         "and --mic-output INDEX to select your virtual cable's playback endpoint.")
-    return matches[0]
-
-
-class MicrophoneOutput:
-    """Render received microphone frames to an explicitly selected Windows endpoint."""
-    def __init__(self, device_index):
-        import pyaudiowpatch as pa
-        self.pa = pa.PyAudio()
-        self.stream = None
-        self.frames = queue.Queue(maxsize=5)
-        self.pending = bytearray()
-        self.dropped = 0
-        self.closed = False
-        try:
-            device = self.pa.get_device_info_by_index(device_index)
-            self.name = device["name"]
-            self.loopback_index = int(self.pa.get_wasapi_loopback_analogue_by_index(device_index)["index"])
-            channels = min(2, int(device["maxOutputChannels"]))
-            if channels < 1 or device.get("isLoopbackDevice"):
-                raise ValueError("Microphone destination must be a Windows playback endpoint.")
-            rate = int(device["defaultSampleRate"])
-            self.channels = channels
-            self.resampler = AudioResampler(format="s16", layout="stereo" if channels == 2 else "mono",
-                                            rate=rate, frame_size=rate // 50)
-
-            def callback(data, count, timing, status):
-                size = count * channels * 2
-                while len(self.pending) < size:
-                    try:
-                        self.pending.extend(self.frames.get_nowait())
-                    except queue.Empty:
-                        break
-                output = bytes(self.pending[:size])
-                del self.pending[:size]
-                return (output.ljust(size, b"\0"), pa.paComplete if self.closed else pa.paContinue)
-
-            self.stream = self.pa.open(format=pa.paInt16, channels=channels, rate=rate,
-                                       output=True, output_device_index=device_index,
-                                       frames_per_buffer=rate // 50, stream_callback=callback)
-        except Exception:
-            self.close()
-            raise
-
-    def write(self, frame):
-        if self.closed:
-            raise RuntimeError("Virtual microphone output is closed.")
-        if not self.stream.is_active():
-            raise RuntimeError("Virtual microphone device stopped. Reconnect after checking Windows audio devices.")
-        for normalized in self.resampler.resample(frame):
-            data = bytes(normalized.planes[0])[:normalized.samples * self.channels * 2]
-            try:
-                self.frames.put_nowait(data)
-            except queue.Full:
-                try:
-                    self.frames.get_nowait()
-                except queue.Empty:
-                    pass
-                self.dropped += 1
-                self.frames.put_nowait(data)
-
-    def close(self):
-        self.closed = True
-        if self.stream is not None:
-            self.stream.close()
-            self.stream = None
-        if self.pa is not None:
-            self.pa.terminate()
-            self.pa = None

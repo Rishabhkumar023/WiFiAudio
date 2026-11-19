@@ -30,7 +30,7 @@ class StreamingTests(unittest.IsolatedAsyncioTestCase):
     async def authenticated(self):
         ws = await self.client.ws_connect("/connect")
         await ws.send_json({"token": self.server.token})
-        self.assertEqual(await ws.receive_json(), {"type": "ready", "microphone": self.server.sink_factory is not None})
+        self.assertEqual(await ws.receive_json(), {"type": "ready"})
         return ws
 
     async def receive_audio(self):
@@ -97,55 +97,6 @@ class StreamingTests(unittest.IsolatedAsyncioTestCase):
         self.server.urls = ["http://127.0.0.1/#token=test"]
         response = await self.client.get("/pair")
         self.assertIn("data:image/png;base64,", await response.text())
-
-    async def test_bidirectional_microphone_delivery_and_cleanup(self):
-        sinks = []
-        class Sink:
-            name = "Test virtual microphone"
-            closed = False
-            frames = []
-            def write(self, frame):
-                self.frames.append(frame)
-            def close(self):
-                self.closed = True
-        def factory():
-            sink = Sink()
-            sinks.append(sink)
-            return sink
-        self.server.sink_factory = factory
-        ws = await self.authenticated()
-        pc = RTCPeerConnection(RTCConfiguration(iceServers=[]))
-        self.peers.append(pc)
-        microphone = ToneTrack()
-        pc.addTrack(microphone)
-        await pc.setLocalDescription(await pc.createOffer())
-        await ws.send_json({"type": "offer", "sdp": pc.localDescription.sdp, "microphone": True})
-        answer = await asyncio.wait_for(ws.receive_json(), 10)
-        self.assertEqual(answer.get("type"), "answer", answer)
-        await pc.setRemoteDescription(RTCSessionDescription(sdp=answer["sdp"], type="answer"))
-        notice = await asyncio.wait_for(ws.receive_json(), 10)
-        self.assertEqual(notice["type"], "mic-active")
-        self.assertTrue(any(bytes(f.planes[0]).strip(b"\0") for f in sinks[0].frames))
-        await ws.close()
-        await pc.close()
-        microphone.stop()
-        for _ in range(100):
-            if self.server.active is None:
-                break
-            await asyncio.sleep(.01)
-        self.assertTrue(sinks[0].closed)
-
-    async def test_microphone_requires_configured_destination(self):
-        ws = await self.authenticated()
-        pc = RTCPeerConnection(RTCConfiguration(iceServers=[]))
-        self.peers.append(pc)
-        mic = ToneTrack()
-        pc.addTrack(mic)
-        await pc.setLocalDescription(await pc.createOffer())
-        await ws.send_json({"type": "offer", "sdp": pc.localDescription.sdp, "microphone": True})
-        self.assertIn("--meeting", (await ws.receive_json())["error"])
-        mic.stop()
-        await ws.close()
 
 
 if __name__ == "__main__":
