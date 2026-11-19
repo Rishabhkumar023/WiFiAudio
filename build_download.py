@@ -63,6 +63,8 @@ def main():
             old_part.unlink()
     for name in ("index.html", "download.js", "_headers"):
         shutil.copy2(ROOT / "download-site" / name, SITE / name)
+    shutil.copy2(ROOT / "LICENSE", SITE / "LICENSE.txt")
+    shutil.copy2(ROOT / "THIRD_PARTY_NOTICES.md", SITE / "THIRD_PARTY_NOTICES.txt")
     payload = executable.read_bytes()
     parts = []
     for index, start in enumerate(range(0, len(payload), 20 * 1024 * 1024)):

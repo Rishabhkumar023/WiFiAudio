@@ -2,6 +2,13 @@ For Use:- https://wifiaudio-rishabh.pages.dev/
 
 # Wi-Fi Audio — Windows to Android prototype
 
+Copyright (c) 2026 **Rishabh Kumar (@Rishabhkumar023)**.
+Original WiFiAudio materials use the [WiFiAudio Original Materials License](LICENSE).
+Use and unchanged, no-charge sharing are allowed. Rebranding, selling or publishing
+modified WiFiAudio materials requires written permission. This is not an open-source
+license. [Third-party licenses and unresolved binary-distribution obligations](THIRD_PARTY_NOTICES.md)
+remain separate; the ownership notice does not override them.
+
 **Windows download:** https://wifiaudio-rishabh.pages.dev/
 Share that page with friends. Each person runs the app on their own PC and pairs
 their own phone; do not share private receiver links or local TLS keys.

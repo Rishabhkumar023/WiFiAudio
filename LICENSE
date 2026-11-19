@@ -1,0 +1,85 @@
+WiFiAudio Original Materials License 1.0
+Effective date: 20 November 2026
+
+Copyright (c) 2026 Rishabh Kumar (@Rishabhkumar023).
+All rights reserved in the original WiFiAudio materials, except as expressly
+permitted below. Third-party materials are excluded as described in section 5.
+
+1. Scope and ownership
+
+This license applies to the original WiFiAudio application code, interface,
+documentation and download-page materials supplied by the copyright holder.
+It applies only to material the copyright holder owns and is entitled to license
+separately under these terms.
+It does not transfer ownership. Public access to source code does not make
+these original materials open source or place them in the public domain.
+This is a proprietary freeware license, not an OSI-approved open-source license.
+
+2. Permitted use and unchanged sharing
+
+You may download, install and run an official WiFiAudio release without a
+license fee for personal use or your organization's internal activities,
+including work meetings. You may make backup copies.
+
+You may share the official download link. You may also share an unchanged
+official release without charging for it, provided its name, copyright notices,
+this license and applicable third-party notices accompany the copy. Do not
+present yourself as its author, owner or official publisher.
+
+3. Restrictions on the original WiFiAudio materials
+
+Except where section 5 or applicable law grants the relevant right, you need
+prior written permission from Rishabh Kumar to:
+
+- remove or change authorship, copyright, license or origin notices;
+- rebrand or rename the software and distribute it as your own product;
+- sell, sublicense, rent, license for a fee or commercially redistribute it;
+- publish modified versions or reuse its original code, interface or assets
+  in another distributed product or service;
+- represent that you created or own the original WiFiAudio materials, or
+  register those materials as your own intellectual property.
+
+No permission is granted to use the WiFiAudio name to imply endorsement of an
+unrelated or modified product. No trademark registration is asserted here.
+
+4. Private inspection and interoperability
+
+You may inspect the software and make private modifications for your own use,
+testing, interoperability, or debugging modifications to third-party libraries.
+These permissions do not authorize publishing or rebranding the original
+WiFiAudio materials. This license does not prohibit reverse engineering where
+required by applicable law or by the licenses of included third-party software.
+
+5. Third-party software and other rights
+
+Third-party components remain the property of their respective owners and are
+governed by their own licenses, not this license. This includes Python, Tcl/Tk,
+PyAudioWPatch/PortAudio, PyAV, FFmpeg and its codec libraries, aiortc, and the
+other dependencies identified in THIRD_PARTY_NOTICES.md and the bundled
+THIRD_PARTY_LICENSES directory. VB-CABLE is separate third-party software with
+its own publisher's terms; downloading it does not transfer its ownership.
+
+Nothing here reduces rights granted by a third-party license, including rights
+to copy, modify, replace, relink, debug or redistribute covered components.
+Those terms prevail wherever they apply. Rights necessarily granted under a
+hosting platform's terms and non-waivable rights under applicable law remain
+unaffected. This document is not a statement that all third-party distribution
+obligations have been satisfied; see THIRD_PARTY_NOTICES.md for review limits.
+
+6. Warranty and liability
+
+The software is provided as available, without a promise of fitness for a
+particular purpose, uninterrupted operation or compatibility with every device
+or meeting application. To the extent permitted by applicable law, the copyright
+holder disclaims warranties and liability for losses arising from its use.
+Nothing here excludes rights or liabilities that cannot legally be excluded.
+
+7. Permission requests and applicability
+
+Request additional permission from Rishabh Kumar through the GitHub account
+https://github.com/Rishabhkumar023 and identify the intended use. A donation
+does not itself purchase ownership, redistribution rights or a separate license.
+
+These terms do not retroactively withdraw rights previously granted under
+another applicable license or written agreement. No software license can
+guarantee that unauthorized copying will never occur.
