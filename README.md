@@ -1,12 +1,68 @@
 # Wi-Fi Audio — Windows to Android prototype
 
+**Windows download:** https://wifiaudio-rishabh.pages.dev/
+Share that page with friends. Each person runs the app on their own PC and pairs
+their own phone; do not share private receiver links or local TLS keys.
+
 Stream Windows system audio over Wi-Fi to an Android browser, which plays it
 through the phone's paired Bluetooth earphones. The desktop does not need Bluetooth.
 The phone supplies the Bluetooth radio. It cannot connect a Wi-Fi-only PC directly
 to Bluetooth-only earbuds.
 
-The Windows sender and Chrome receiver are implemented. This is an early prototype,
-not a verified Android background-audio application.
+The Windows sender and Chrome receiver support listening and optional microphone
+return for meetings. This is an early browser-based prototype, not a native Android
+app or a verified background-audio application.
+
+## Meetings: listen and speak
+
+The return path is **phone/earbuds microphone -> Wi-Fi -> CABLE Input -> CABLE Output
+-> desktop meeting app**. Windows sees a standard recording device, so applications
+that let you select a Windows microphone can use it. Meet, Zoom and Teams have not
+yet been individually tested; this is not a claim of universal compatibility.
+
+1. Install [VB-CABLE from its publisher](https://vb-audio.com/Cable/) as administrator
+   and reboot as instructed by the installer. It is third-party donationware;
+   review its terms. This repository does not bundle or silently install it.
+2. In Windows **Settings > Privacy > Microphone**, enable device microphone access,
+   app access and desktop-app access. A disabled top-level switch blocks virtual
+   microphone recording too.
+3. Run **Start-Meeting.cmd**, included beside the packaged EXE. From source, run
+   `Start-Audio.cmd --meeting` instead.
+4. Complete the **one-time Android certificate setup** on the PC's pairing page:
+   scan the certificate QR, download `WiFiAudio-CA.crt`, and install it using Android
+   Settings > Security > Encryption & credentials > Install a certificate > CA
+   certificate (names vary by phone). Compare its fingerprint to the one on the PC.
+   Install only the certificate generated on your own PC. It is a local CA trust
+   addition; remove it from Android's user credentials when no longer using the app.
+5. Scan the **HTTPS receiver QR**, enable **Send my microphone to the meeting**, then
+   tap Connect and allow microphone permission. Do not bypass certificate warnings:
+   browser mic capture needs a trusted secure origin. Some managed phones prohibit
+   user-installed CAs; this receiver cannot promise support on those phones.
+6. In Meet/Zoom/Teams or another meeting app, choose **CABLE Output (VB-Audio Virtual
+   Cable)** as the microphone. Choose your **normal Windows speakers/output** for
+   meeting playback, not CABLE Input. Do not enable Windows "Listen to this device"
+   on the cable: that would feed the microphone back into the outgoing stream.
+7. The phone shows the active microphone and confirms when audio reaches the PC
+   cable. Use **Mute microphone** to send silence, or Disconnect to release the mic.
+
+Android/Chrome decide which microphones they expose. The mic selector shows the
+available inputs after permission is granted; disconnect, select an input and
+reconnect to change it. The default may be the **phone mic**, not the earbuds mic.
+Guaranteed headset-mic routing and screen-off operation need a native Android app
+and device tests; they are not implemented here. Bluetooth headset call mode can
+reduce playback quality. Keep the page open and the phone awake.
+
+Meeting mode uses HTTPS/WSS on port 8765 and a separate pairing/certificate service
+on port 8766. It stores private TLS keys in `.local/tls` beside the EXE (or source),
+never in GitHub. Preserve that directory to avoid trusting a new CA every update.
+Never share its private keys. New PC IP addresses produce a new server certificate
+under the same CA; restart the app after changing networks and scan the new QR.
+
+For other virtual cables: use `--list-playback-devices`, then
+`--meeting --mic-output INDEX`. The selected device must be the cable's playback
+endpoint; choose the matching recording endpoint in the meeting app. The app does
+not change Windows default audio devices. `--device INDEX` selects the separate
+outgoing desktop loopback device from `--list-devices`.
 
 ## Run the Windows app
 
@@ -35,7 +91,7 @@ Run `Setup.cmd`, then `Start-Audio.cmd`. Both devices must share a trusted priva
 LAN or phone hotspot. Pair the earbuds with Android, scan the PC pairing QR and
 tap Connect audio. Tap the audio player's Play button if autoplay is blocked.
 The sender captures the selected Windows output only after a phone authenticates;
-it does not capture a microphone or save audio. All sound on that output,
+it does not capture the PC microphone or save audio. All sound on that output,
 including notifications, can be transmitted.
 
 `Start-Audio.cmd --test-tone` selects synthetic 440 Hz audio instead of capture.
@@ -49,9 +105,10 @@ Google Chrome and do not download a browser.
 
 ## Verification
 
-- Five local integration tests passed: real WebRTC test-tone frame delivery,
+- Seven local integration tests passed: real WebRTC test-tone frame delivery,
   disconnect/reconnect, exclusive listener, invalid authentication/malformed offer,
-  receiver/QR pages, shutdown during negotiation and shutdown with active audio.
+  receiver/QR pages, shutdown during negotiation and shutdown with active audio,
+  microphone return delivery/cleanup and rejection when no destination is configured.
 - Actual desktop Chrome received/played the synthetic stream and reconnected;
   no JavaScript errors. Mobile-sized layout inspected at 390 pixels wide.
 - Windows Realtek WASAPI loopback opened and closed at 48 kHz, stereo.
@@ -59,20 +116,38 @@ Google Chrome and do not download a browser.
 - Python compilation, JavaScript syntax and dependency consistency checks passed.
 - Packaged EXE listed Windows output devices, served its bundled QR/receiver pages,
   and streamed synthetic audio to actual desktop Chrome successfully.
+- Meeting tests verified the local TLS chain and persistent CA, two-way desktop
+  Chrome media with a synthetic browser microphone, mute/unmute, reconnect,
+  microphone-track release and the permission-denied recovery path. Browser tests
+  use an isolated certificate-error override; a separate HTTP client verifies the
+  real CA chain. This does not establish Android certificate-store behavior.
+- VB-CABLE Pack46 was downloaded from the publisher on 2026-11-20; its x64 installer
+  had a valid Authenticode signature from BUREL VINCENT. Its render endpoint opened.
+  The real recording-endpoint test initially failed while Windows microphone privacy
+  was set to Deny. After access was enabled, the complete synthetic browser mic ->
+  WebRTC -> CABLE Input -> CABLE Output recording path passed twice, including
+  reconnect. The recording endpoint detected test audio and near-silence while muted.
+  This verifies the Windows virtual-mic path, not a real Android headset or meeting call.
 - Android Chrome, physical Bluetooth earbuds, Wi-Fi/hotspot traversal, screen-off
   behavior and video/audio sync remain unverified. Desktop Chrome is not Android evidence.
 
 Run `.venv/Scripts/python.exe -m unittest -v test_stream`,
 `.venv/Scripts/python.exe test_browser.py`, and
 `.venv/Scripts/python.exe test_package.py` to repeat the local checks.
+Run `.venv/Scripts/python.exe test_meeting.py` for the synthetic meeting test,
+or add `--real-cable` to check actual VB-CABLE recording with synthetic browser
+audio. The latter requires VB-CABLE and Windows microphone access; it does not
+capture the user's physical microphone.
 
 The receiver uses Chrome rather than a native Android app. Keep the page open
 and phone awake. Headset disconnect can cause Android to play through the phone
 speaker. Bluetooth and network buffering add unmeasured latency. Changing the
 Windows output requires reconnecting. Protected audio may not be capturable.
 
-WebRTC media uses DTLS-SRTP, but this prototype serves its page and signaling over
-HTTP. It is not authenticated against an active LAN attacker. Use only a trusted
+WebRTC media uses DTLS-SRTP. Listening mode serves its page and signaling over
+HTTP and is not authenticated against an active LAN attacker. Meeting mode uses
+HTTPS with the locally generated CA; its initial certificate download must be
+verified against the PC before trust is added. Use only a trusted
 private network; do not expose it to the Internet. No STUN/TURN server is configured.
 Pairing links authorize listening: keep them private. Windows Firewall may need
 user-approved access for this Python process on private networks (TCP signaling

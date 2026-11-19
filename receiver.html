@@ -15,6 +15,8 @@
     button {border:0;border-radius:12px;padding:15px 20px;font:inherit;font-weight:650;cursor:pointer;background:#72dec2;color:#10251e;margin:6px 5px 6px 0}
     button:disabled {opacity:.45;cursor:default} .secondary {background:#344459;color:#eaf0f8}
     audio {width:100%;margin-top:18px} li {padding:7px 0;line-height:1.5;color:#adbdcf}
+    select {width:100%;padding:12px;margin:10px 0;background:#10151d;color:#eaf0f8;border:1px solid #536780;border-radius:8px}
+    label {display:block;margin:12px 0} input {width:18px;height:18px;vertical-align:middle}
     small {color:#94a6bc;line-height:1.6;display:block} a {color:#72dec2}
   </style>
 </head>
@@ -25,16 +27,23 @@
   <div class="card">
     <div id="status" role="status" aria-live="polite">Ready to connect</div>
     <p id="source">Pair your Bluetooth earphones with this phone first.</p>
+    <label><input type="checkbox" id="use-mic"> Send my microphone to the meeting</label>
+    <label for="mic-device">Microphone</label>
+    <select id="mic-device"><option value="">Phone/browser default microphone</option></select>
+    <small id="mic-status" aria-live="polite">Microphone is off. Meeting mode requires the PC virtual audio cable and trusted HTTPS.</small>
     <button id="connect">Connect audio</button>
     <button id="stop" class="secondary" disabled>Disconnect</button>
+    <button id="mute" class="secondary" disabled>Mute microphone</button>
     <audio id="audio" controls autoplay playsinline></audio>
   </div>
   <ol>
     <li>Keep the PC and phone on the same private Wi-Fi or phone hotspot.</li>
     <li>Select your earphones as the phone's media output.</li>
     <li>Connect, then play music on your PC. If needed, tap Play above.</li>
+    <li>For meetings, enable the microphone above. In the desktop meeting app choose <strong>CABLE Output</strong> as microphone and your normal Windows speakers as speaker output.</li>
   </ol>
   <small>Prototype: keep this page open and the phone awake. Bluetooth adds delay. A disconnected headset may switch playback to the phone speaker. Only one phone can connect at a time.</small>
+  <p><small>Android and the browser decide whether the headset mic is available. Check the active microphone shown here; do not assume it is the earbuds mic. A headset microphone may reduce Bluetooth playback quality.</small></p>
   <script src="/receiver.js"></script>
 </body>
 </html>

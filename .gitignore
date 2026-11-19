@@ -6,6 +6,13 @@ build/
 dist/
 *.spec
 receiver-preview.png
+download-preview.png
 .env
 .env.*
 !.env.example
+.local/
+*.pem
+*.key
+*.crt
+*.cer
+.wrangler/
