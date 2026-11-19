@@ -38,14 +38,14 @@ button.onclick = async () => {
       status.textContent = `Downloaded ${(received / 1048576).toFixed(1)} of ${(manifest.bytes / 1048576).toFixed(1)} MB…`;
     }
     if (received !== manifest.bytes) throw new Error("Incomplete download. Please retry.");
-    const blob = new Blob(chunks, {type: "application/zip"});
+    const blob = new Blob(chunks, {type: manifest.mime || "application/octet-stream"});
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = manifest.filename;
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 60000);
-    status.textContent = "Download ready. Extract the entire ZIP, then open WiFiAudio.exe.";
+    status.textContent = "Download ready. Open WiFiAudio, choose a mode and scan its QR with your phone.";
   } catch (error) {
     status.textContent = error.message;
   } finally {

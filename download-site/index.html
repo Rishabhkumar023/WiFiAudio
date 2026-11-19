@@ -19,27 +19,27 @@ progress{width:100%;height:10px;accent-color:#80e2c6}#status{margin:12px 0;min-h
 </style>
 </head>
 <body><main>
-<nav><div class="brand">WiFiAudio</div><span class="badge">Windows preview · v0.2</span></nav>
+<nav><div class="brand">WiFiAudio</div><span class="badge">Windows preview · v0.3</span></nav>
 <header><h1>Your desktop audio.<br>In your earphones.</h1><p>Use your Android phone to listen to a Windows PC over Wi-Fi. Your PC doesn't need Bluetooth or an extra dongle.</p>
 <div class="route" aria-label="Audio route"><span>Windows PC</span>Wi-Fi<span>Android phone</span>Bluetooth<span>Earphones</span></div></header>
 <section class="download" aria-labelledby="download-title"><h2 id="download-title">Get the Windows app</h2>
-<p>Download on your PC and extract the entire ZIP. Python is included; no separate Python install is needed.</p>
+<p>One EXE. Open the app, choose a mode and scan its QR with your phone. No ZIP extraction or separate Python installation.</p>
 <button id="download" disabled>Preparing download…</button><p id="status" role="status" aria-live="polite">Loading package details.</p>
 <progress id="progress" value="0" max="100" hidden aria-label="Download progress"></progress>
-<p class="meta" id="package">Windows x64 · portable folder</p>
-<p class="meta">Keep <code>_internal</code> beside <code>WiFiAudio.exe</code>. The EXE alone will not run. This preview app is not digitally signed.</p>
+<p class="meta" id="package">Windows x64 · single EXE</p>
+<p class="meta">The app includes its runtime and guides you through meeting setup. This preview app is not digitally signed.</p>
 <a href="SHA256SUMS.txt">Download checksum</a>
 <noscript><p>JavaScript is required to assemble this Windows download.</p></noscript></section>
 <div class="columns"><section><h2>Listen in a few steps</h2><ol>
 <li>Pair your Bluetooth earphones with your Android phone.</li><li>Connect the PC and phone to the same private Wi-Fi, or connect the PC to your phone's hotspot.</li>
-<li>Extract the ZIP and run <strong>WiFiAudio.exe</strong> on the PC.</li><li>Scan the PC's QR code with the phone. Open it in Chrome and tap <strong>Connect audio</strong>.</li>
+<li>Open <strong>WiFiAudio</strong>, choose <strong>Listen to PC audio</strong> and click <strong>Connect my phone</strong>.</li><li>Scan the app's QR code with the phone. Open it in Chrome and tap <strong>Connect audio</strong>.</li>
 <li>Play YouTube or other audio on the PC. Keep the phone page open and awake.</li></ol></section>
 <section><h2>Speak in meetings</h2><p>Meeting mode can send your phone's microphone back to a Windows virtual microphone.</p><ol>
-<li>Install <a href="https://vb-audio.com/Cable/" rel="noopener noreferrer">VB-CABLE from its publisher</a>, then follow its restart instructions. Enable Windows microphone access.</li>
-<li>Run <strong>Start-Meeting.cmd</strong>. Follow its one-time Android certificate setup for secure microphone access.</li><li>On the phone, enable <strong>Send my microphone</strong> and allow microphone permission.</li>
+<li>Choose <strong>Listen + speak in meetings</strong> in the app. If needed, click <strong>Set up meeting microphone</strong>. WiFiAudio downloads and verifies <a href="https://vb-audio.com/Cable/" rel="noopener noreferrer">VB-CABLE</a>; approve its installer and restart if requested.</li>
+<li>The app checks Windows microphone access. Click <strong>Connect my phone</strong>, then <strong>Open setup guide</strong> for the one-time Android certificate step.</li><li>On the phone, enable <strong>Send my microphone</strong> and allow microphone permission.</li>
 <li>In your meeting app select <strong>CABLE Output</strong> as the microphone. Keep normal Windows speakers as the speaker output.</li></ol></section></div>
 <section class="note"><h2>What to expect from this preview</h2><p>Desktop Chrome audio, microphone return through a real VB-CABLE recording endpoint, mute and reconnect have been tested with synthetic audio. Android phones, physical earbuds and individual meeting apps still need device testing.</p><p>Your browser may use the phone mic instead of the earbuds mic. Bluetooth adds delay; background and screen-off playback are not guaranteed.</p></section>
 <details><summary>Does this page stream my PC audio?</summary><p>No. This is a download page. Audio runs between the app on your own Windows PC and your phone on the local network. Share this download link with friends, not your private pairing QR or certificate keys.</p></details>
-<details><summary>The EXE does not open</summary><p>Choose Extract All on the ZIP first. Open WiFiAudio.exe inside the extracted WiFiAudio folder, with its _internal folder still beside it. Read the included README for firewall and setup instructions.</p></details>
-<footer>No account is needed to download. The virtual audio driver is third-party software and is not bundled. Use only trusted private networks. The included README has full setup instructions and verification limits.</footer>
+<details><summary>Why does meeting mode ask for permissions?</summary><p>Windows must approve the virtual microphone driver, and your phone must allow mic access. This browser receiver also needs a one-time local certificate setup. WiFiAudio guides these steps but cannot approve them for you. Listening mode does not need the meeting driver or certificate.</p></details>
+<footer>No account is needed to download. The virtual audio driver is third-party software and is downloaded only after you choose setup. Use only trusted private networks. This is a browser-based phone receiver; a native Android app is not included.</footer>
 </main><script src="download.js"></script></body></html>

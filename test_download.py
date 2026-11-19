@@ -3,7 +3,6 @@ import argparse
 import hashlib
 import json
 import tempfile
-import zipfile
 from pathlib import Path
 
 from aiohttp import web
@@ -38,18 +37,13 @@ async def main():
                 download = await event.value
                 assert download.suggested_filename == manifest["filename"]
                 with tempfile.TemporaryDirectory() as directory:
-                    archive = Path(directory) / "download.zip"
+                    archive = Path(directory) / "WiFiAudio.exe"
                     await download.save_as(archive)
                     assert hashlib.sha256(archive.read_bytes()).hexdigest() == manifest["sha256"]
-                    with zipfile.ZipFile(archive) as contents:
-                        names = contents.namelist()
-                        assert "WiFiAudio/WiFiAudio.exe" in names
-                        assert "WiFiAudio/Start-Meeting.cmd" in names
-                        assert "WiFiAudio/_internal/python310.dll" in names
-                        assert not any("/.local/" in name or name.endswith(".key") for name in names)
-                        assert contents.testzip() is None
+                    assert archive.read_bytes()[:2] == b"MZ"
+                    assert archive.read_bytes() == (root / "dist/WiFiAudio.exe").read_bytes()
                 await page.screenshot(path=str(root / "download-preview.png"), full_page=True)
-                print("PASS: mobile layout, browser download, complete ZIP checksum, required runtime and no private keys")
+                print("PASS: mobile layout, browser EXE download and checksum match to the tested standalone build")
             finally:
                 await browser.close()
     finally:

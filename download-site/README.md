@@ -4,10 +4,10 @@ Production: https://wifiaudio-rishabh.pages.dev/
 
 Build the Windows app with `Build.cmd`, then run
 `.venv/Scripts/python.exe build_download.py` from the repository root.
-The builder includes the complete portable folder and dependency license files,
-excludes `.local` identities, and writes the static deployment into this directory's
-ignored `dist/` folder. The ZIP is split into 20 MiB assets because Cloudflare Pages
-limits individual assets to 25 MiB. The browser verifies each part and saves one ZIP.
+Build.cmd bundles the GUI, audio runtime and dependency licenses in one EXE.
+The download builder writes static assets into this directory's ignored `dist/`
+folder. The EXE is split into 20 MiB assets because Cloudflare Pages limits individual
+assets to 25 MiB. The browser verifies each part and saves one standalone EXE.
 
 Check locally with `.venv/Scripts/python.exe test_download.py`. From this directory,
 publish with `wrangler pages deploy dist --project-name wifiaudio-rishabh --branch main`.

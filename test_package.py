@@ -8,6 +8,8 @@ from pathlib import Path
 
 from aiohttp import ClientSession, ClientError
 from playwright.async_api import async_playwright
+import psutil
+from process_test_utils import stop_owned_process
 
 
 async def main():
@@ -15,7 +17,7 @@ async def main():
         reserve.bind(("127.0.0.1", 0))
         port = reserve.getsockname()[1]
     parser = argparse.ArgumentParser()
-    parser.add_argument("--exe", type=Path, default=Path(__file__).parent / "dist/WiFiAudio/WiFiAudio.exe")
+    parser.add_argument("--exe", type=Path, default=Path(__file__).parent / "dist/WiFiAudio.exe")
     parser.add_argument("--meeting", action="store_true", help="Test packaged HTTPS and real virtual-cable rendering")
     args = parser.parse_args()
     exe = args.exe.resolve()
@@ -28,6 +30,7 @@ async def main():
         str(exe), "--test-tone", "--no-browser", "--host", "127.0.0.1", "--port", str(port),
         *extra,
         stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE)
+    owned = psutil.Process(process.pid)
     try:
         base = f"{'https' if args.meeting else 'http'}://127.0.0.1:{port}"
         pairing_base = f"http://127.0.0.1:{pair_port}" if args.meeting else base
@@ -67,7 +70,7 @@ async def main():
                 await browser.close()
     finally:
         if process.returncode is None:
-            process.terminate()
+            await asyncio.to_thread(stop_owned_process, owned)
         await asyncio.wait_for(process.wait(), 10)
         tls.cleanup()
 

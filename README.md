@@ -24,14 +24,16 @@ The return path is **phone/earbuds microphone -> Wi-Fi -> CABLE Input -> CABLE O
 that let you select a Windows microphone can use it. Meet, Zoom and Teams have not
 yet been individually tested; this is not a claim of universal compatibility.
 
-1. Install [VB-CABLE from its publisher](https://vb-audio.com/Cable/) as administrator
-   and reboot as instructed by the installer. It is third-party donationware;
-   review its terms. This repository does not bundle or silently install it.
-2. In Windows **Settings > Privacy > Microphone**, enable device microphone access,
-   app access and desktop-app access. A disabled top-level switch blocks virtual
-   microphone recording too.
-3. Run **Start-Meeting.cmd**, included beside the packaged EXE. From source, run
-   `Start-Audio.cmd --meeting` instead.
+1. Open WiFiAudio and choose **Listen + speak in meetings**. The app checks the driver
+   and Windows microphone access. If needed, click **Set up meeting microphone**:
+   after confirmation it downloads [VB-CABLE from its publisher](https://vb-audio.com/Cable/),
+   checks its Authenticode signature and publisher, then opens the visible installer.
+   Review its donationware terms, approve installation and restart if requested.
+   The app never restarts Windows or silently changes default audio devices.
+2. If mic access is blocked, click **Windows mic permission** and enable device,
+   app and desktop-app microphone access. Click **Check again** in WiFiAudio.
+3. Choose the Windows output you want to hear and click **Connect my phone**, then
+   **Open setup guide**. No command or separate launcher is needed.
 4. Complete the **one-time Android certificate setup** on the PC's pairing page:
    scan the certificate QR, download `WiFiAudio-CA.crt`, and install it using Android
    Settings > Security > Encryption & credentials > Install a certificate > CA
@@ -57,8 +59,10 @@ and device tests; they are not implemented here. Bluetooth headset call mode can
 reduce playback quality. Keep the page open and the phone awake.
 
 Meeting mode uses HTTPS/WSS on port 8765 and a separate pairing/certificate service
-on port 8766. It stores private TLS keys in `.local/tls` beside the EXE (or source),
-never in GitHub. Preserve that directory to avoid trusting a new CA every update.
+on port 8766. The desktop interface stores private TLS keys in
+`%LOCALAPPDATA%/WiFiAudio/tls`, never in GitHub or the download. Preserve that directory
+to avoid trusting a new CA every update. Advanced CLI use retains its `.local/tls`
+default, or uses an explicit `--tls-dir`.
 Never share its private keys. New PC IP addresses produce a new server certificate
 under the same CA; restart the app after changing networks and scan the new QR.
 
@@ -70,19 +74,19 @@ outgoing desktop loopback device from `--list-devices`.
 
 ## Run the Windows app
 
-Build from source using the instructions below, then open
-`dist/WiFiAudio/WiFiAudio.exe`. **Copy the entire `dist/WiFiAudio` folder when moving
-the app; copying only the EXE will not work.** Keep `_internal` beside the EXE.
-This packaged build does not require a separate Python installation. The PC browser
-opens a QR page; the console must stay open while listening.
+Download and open the **single EXE** from the download page, or build from source
+and open `dist/WiFiAudio.exe`. Version 0.3 includes its runtime: there is no ZIP to
+extract, no `_internal` folder to carry and no separate Python install. First launch
+may take a few seconds while the bundled runtime extracts to a temporary directory.
 
 1. Pair your earbuds with the Android phone and select them for media playback.
 2. Connect the PC and phone to the same private Wi-Fi, or connect the PC to the phone hotspot.
-3. Scan the PC's QR with the phone and open the link in Chrome.
+3. In WiFiAudio choose **Listen to PC audio**, choose the Windows output and click
+   **Connect my phone**. Scan the app's QR with the phone and open it in Chrome.
 4. Tap **Connect audio**, then start YouTube on the desktop. Tap the player's Play button if necessary.
 5. Keep the phone page open and awake. Use **Disconnect** to stop; close the PC sender when done.
 
-If more than one QR is shown, use the PC's Wi-Fi adapter address. If Windows asks
+If the address selector has several entries, choose the PC's Wi-Fi address. If Windows asks
 for firewall access, allow the app on your trusted private network. Guest networks
 that isolate devices will not work. Do not mute the Windows audio output to silence
 the PC: that can also silence captured audio, depending on the driver.
@@ -98,6 +102,11 @@ The sender captures the selected Windows output only after a phone authenticates
 it does not capture the PC microphone or save audio. All sound on that output,
 including notifications, can be transmitted.
 
+`Start-Audio.cmd` opens the desktop interface; passing command-line flags opens the
+advanced server instead (for example `Start-Audio.cmd --meeting`).
+The standalone download opens the GUI directly. Its **Disconnect** button releases
+audio devices; closing the window stops the owned server before exiting.
+
 `Start-Audio.cmd --test-tone` selects synthetic 440 Hz audio instead of capture.
 `Start-Audio.cmd --list-devices` lists loopback output indices; `--device INDEX`
 selects one explicitly. `--advertise-host PC_IPV4` selects the address in the QR.
@@ -105,9 +114,19 @@ Ctrl+C stops the sender. A new launch creates a new pairing token.
 
 To build: install `pyinstaller==6.22.3` into `.venv`, then run `Build.cmd`.
 For browser checks, install `playwright==1.65.2` into `.venv`; tests use existing
-Google Chrome and do not download a browser.
+Google Chrome and do not download a browser. Packaged process-lifecycle tests also
+use the development-only `psutil` package.
 
 ## Verification
+
+- Version 0.3's standalone EXE opens the actual desktop UI and closes normally.
+  Hidden-window GUI tests cover device listing, QR display, start/stop/restart and
+  stopping during startup. The desktop interface runs an owned in-process server.
+- The driver helper accepted the official signed installer and rejected unsigned
+  input and a validly signed executable from another publisher. It was tested in
+  verification-only mode; no additional driver install was performed by these tests.
+  The in-app downloader also fetched/extracted the official package in an isolated
+  temporary folder and passed publisher verification without installing it.
 
 - Seven local integration tests passed: real WebRTC test-tone frame delivery,
   disconnect/reconnect, exclusive listener, invalid authentication/malformed offer,

@@ -212,7 +212,7 @@ class AudioServer:
         return app
 
 
-def main():
+def main(argv=None, on_ready=None, stop_event=None):
     parser = argparse.ArgumentParser(description="Windows output -> Wi-Fi -> Android browser -> earphones")
     parser.add_argument("--host", default="0.0.0.0", help="Bind address; default all local IPv4 interfaces")
     parser.add_argument("--port", type=int, default=8765)
@@ -226,7 +226,7 @@ def main():
     parser.add_argument("--tls-dir", type=Path, help="Directory for this installation's private TLS identity")
     parser.add_argument("--test-tone", action="store_true", help="Synthetic audio only; never capture Windows output")
     parser.add_argument("--no-browser", action="store_true")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.list_devices:
         print(json.dumps(list_outputs(), indent=2))
         return
@@ -295,7 +295,20 @@ def main():
             finally:
                 await runner.cleanup()
         app.cleanup_ctx.append(pairing_context)
-    web.run_app(app, host=args.host, port=args.port, ssl_context=ssl_context, access_log=None)
+    if stop_event is None:
+        web.run_app(app, host=args.host, port=args.port, ssl_context=ssl_context, access_log=None)
+    else:
+        async def run_desktop():
+            runner = web.AppRunner(app, access_log=None)
+            await runner.setup()
+            try:
+                await web.TCPSite(runner, args.host, args.port, ssl_context=ssl_context).start()
+                if on_ready:
+                    on_ready(server)
+                await asyncio.to_thread(stop_event.wait)
+            finally:
+                await runner.cleanup()
+        asyncio.run(run_desktop())
 
 
 if __name__ == "__main__":
